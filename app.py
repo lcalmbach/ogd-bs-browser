@@ -15,7 +15,8 @@ MY_NAME = f'ODS Data Explorer'
 GIT_REPO = 'https://github.com/lcalmbach/ogd-bs-browser'
 
 def show_info_box(catalog):
-    IMPRESSUM = f"""<div style="background-color:powderblue; padding: 10px;border-radius: 15px;">
+    IMPRESSUM = f"""<div style="background-color:#34282C; padding: 10px;border-radius: 15px; border:solid 1px white;">
+    <small>App von <a href="mailto:{__author_email__}">{__author__}</a><br>
         <small>App created by <a href="mailto:{__author_email__}">{__author__}</a><br>
         data from: <a href="http://data.bs.ch">OpendataSoft Data Providers</a><br>
         version: {__version__} ({VERSION_DATE})<br>
