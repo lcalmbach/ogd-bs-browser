@@ -30,9 +30,9 @@ def init():
         with open("./style.css") as f:
             st.markdown('<style>{}</style>'.format(f.read()), unsafe_allow_html=True)
     
-    st.set_page_config(  # Alternate names: setup_page, page, layout
+    st.set_page_config( 
         initial_sidebar_state = "auto", 
-        page_title = 'E-Verbrauch-zh', 
+        page_title = MY_NAME, 
         page_icon = MY_EMOJI,
     )
     load_css()
