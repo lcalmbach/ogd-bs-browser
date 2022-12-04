@@ -17,7 +17,7 @@ GIT_REPO = 'https://github.com/lcalmbach/ogd-bs-browser'
 def show_info_box(catalog):
     IMPRESSUM = f"""<div style="background-color:#34282C; padding: 10px;border-radius: 15px; border:solid 1px white;">
         <small>App created by <a href="mailto:{__author_email__}">{__author__}</a><br>
-        data from: <a href="http://data.bs.ch">OpendataSoft Data Providers</a><br>
+        data from: Various OpendataSoft Data Providers<br>
         version: {__version__} ({VERSION_DATE})<br>
         <a href="{GIT_REPO}">git-repo</a><br>
         Current base: {catalog.base}<br>
