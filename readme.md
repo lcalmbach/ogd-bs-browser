@@ -1,0 +1,2 @@
+# ODS Data-Explorer
+[Opendatasoft](https://www.opendatasoft.com/en/) (ODS) is a popular software as a service (SAAS) solution for teams to publish data. The program includes a GUI where users can browse and visualize the data. ODS Data-Explorer allows to discover data from several different sites via the ODS REST API. The Select DAtaset menu allows to select a data provider and a dataset and displays a preview of the dataset. This screen also includes a link to open this dataset in its original location. The menu Aggregate allows to filter and summarize data.
