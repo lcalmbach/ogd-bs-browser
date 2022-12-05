@@ -57,13 +57,23 @@ class Catalog():
         df = pd.DataFrame()
         if response.status_code == 200:
             data = response.json()
-            df = [{'id': x['dataset_id'], 
-                'fields': x['fields'], 
-                'title': x['metas']['default']['title'],
-                'description': x['metas']['default']['description'],
-                'themes': x['metas']['default']['theme'],
-                'issued': x['metas']['dcat']['issued'],
-                } for x in data]
+            if 'dcat' in data[0]['metas']:
+                df = [{'id': x['dataset_id'], 
+                    'fields': x['fields'], 
+                    'title': x['metas']['default']['title'],
+                    'description': x['metas']['default']['description'],
+                    'themes': x['metas']['default']['theme'],
+                    'issued': x['metas']['dcat']['issued'],
+                    } for x in data]
+            else:
+                df = [{'id': x['dataset_id'], 
+                    'fields': x['fields'], 
+                    'title': x['metas']['default']['title'],
+                    'description': x['metas']['default']['description'],
+                    'themes': x['metas']['default']['theme'],
+                    'issued': None,
+                    } for x in data]
+
             df = pd.DataFrame(df)
         df['issued'] = pd.to_datetime(df['issued'], errors='coerce')
         return df
