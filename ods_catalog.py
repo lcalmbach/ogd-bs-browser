@@ -2,10 +2,13 @@ import streamlit as st
 import requests
 import pandas as pd
 import io
+import locale
 
 from tools import *
 from text import *
 from config import *
+
+locale.setlocale(locale.LC_ALL, '')
 
 class Catalog():
     def __init__(self, base):
@@ -24,6 +27,17 @@ class Catalog():
         settings = get_table_settings(df)
         response = show_table(df, cols, settings)
 
+
+    def record_count(self):
+        url = f"{self.base}/api/v2/catalog/datasets/{self.current_dataset['id']}/records?limit=1&offset=0&timezone=UTC"
+        response = requests.get(url)
+        count = 0
+        if response.status_code == 200:
+            data = response.json()
+            count = data["total_count"]
+        return count
+
+
     def get_themes(self):
         themes = []
         dataset_theme = pd.DataFrame({'dataset_id': [], 'theme':[]})
@@ -40,51 +54,30 @@ class Catalog():
     def get_datasets(self):
         url = f"{self.base}/api/v2/catalog/exports/json?limit=-1&offset=0&timezone=UTC"
         response = requests.get(url)
-        x = pd.DataFrame()
+        df = pd.DataFrame()
         if response.status_code == 200:
             data = response.json()
-            x = [{'id': x['dataset_id'], 
+            df = [{'id': x['dataset_id'], 
                 'fields': x['fields'], 
                 'title': x['metas']['default']['title'],
                 'description': x['metas']['default']['description'],
-                'themes': x['metas']['default']['theme']
+                'themes': x['metas']['default']['theme'],
+                'issued': x['metas']['dcat']['issued'],
                 } for x in data]
-            x = pd.DataFrame(x)
-        return  x
-
-
-    def get_datasets1(self):
-        offset=0
-        ok=True
-        results = []
-        while ok:
-            url = f"{self.base}/api/v2/catalog/datasets?limit=100&offset={offset}&timezone=UTC"
-            response = requests.get(url)
-            if response.status_code == 200:
-                data = response.json()['datasets']
-                ok = len(data) > 0
-                if ok:
-                    # st.write(data)
-                    x = [{'id': x['dataset']['dataset_id'], 
-                        'fields': x['dataset']['fields'], 
-                        'title': x['dataset']['metas']['default']['title'],
-                        'description': x['dataset']['metas']['default']['description'],
-                        'themes': x['dataset']['metas']['default']['theme']
-                        } for x in data]
-                    results.append(pd.DataFrame(x))
-                offset += 100
-        return  pd.concat(results)
-    
-    def get_filtered_datasets(self, find_expression):
-        """search forf theme: for index, item in self.datasets.iterrow():
-            if theme.isin(item['themes']):
-                st.write(item)"""
-        df = self.datasets
-        df = df[df['title'].str.contains(find_expression)]
+            df = pd.DataFrame(df)
+        df['issued'] = pd.to_datetime(df['issued'], errors='coerce')
         return df
+
+    
+    
 
 
     def set_current_record(self, themes):
+        def filter_for_title(find_expression):
+            df = self.datasets
+            df = df[df['title'].str.contains(find_expression)]
+            return df
+
         def filter_for_themes(df, themes_filter):
             _df = self.dataset_theme[self.dataset_theme['theme'].isin(themes_filter)]
             df = _df.set_index('dataset_id').join(df.set_index('id'), how='inner')
@@ -93,22 +86,34 @@ class Catalog():
             df = df.drop('theme', axis=1)
             df.drop_duplicates(subset='id')
             return df
+        
+        def filter_for_dates(df, days):
+            df['x'] =  pd.to_datetime("today") - pd.to_timedelta(f"{days} day")
+            _df = df[ df['issued'] > df['x']]
+            return _df
 
-        cols = st.columns(2)
-        with cols[0]:
-            title_filter = st.text_input('Title contains:')
-        with cols[1]:
-            themes_filter = st.multiselect('Dataset belongs to theme(s):', self.all_themes)
-        df = self.datasets if title_filter == '' else self.get_filtered_datasets(title_filter)
+        with st.expander('🔎Filter Datasets', expanded=True):
+            cols = st.columns(3)
+            with cols[0]:
+                title_filter = st.text_input('Title contains:')
+            with cols[1]:
+                themes_filter = st.multiselect('Dataset belongs to theme(s):', self.all_themes)
+            with cols[2]:
+                date_filter = st.number_input('Issued during last n days:',min_value=0,max_value=10000)
+        df = self.datasets if title_filter == '' else filter_for_title(title_filter)
         if len(themes_filter) > 0:
             df = filter_for_themes(df, themes_filter)
+        if date_filter > 0:
+            df = filter_for_dates(df, date_filter)
         settings = get_table_settings(df)
 
         st.markdown('### Datasets')
         st.write(f"{len(df)} records")
         cols = [{'name': 'id', 'type': 'str', 'hide': False, 'precision': 0, 'width':100}, 
-            {'name': 'title', 'hide': False, 'precision': 0, 'type': 'str', 'width':500}]
-        response = show_table(df[['id', 'title']], cols, settings)
+            {'name': 'issued', 'hide': False, 'precision': 0, 'type': 'date', 'width':100},
+            {'name': 'title', 'hide': False, 'precision': 0, 'type': 'str', 'width':500},
+            ]
+        response = show_table(df[['id', 'title', 'issued']], cols, settings)
         if response:
             self.current_dataset = self.datasets[self.datasets["id"]==response['id']].iloc[0]
             self.fields = [x['name'] for x in self.current_dataset['fields']]
@@ -123,16 +128,17 @@ class Catalog():
         st.markdown(f"[Open record at data provider]({link})")
         tabs = st.tabs(['Preview', 'Fields'])
         with tabs[0]:
-            self.export_data(100)
+            self.preview_data(100)
         with tabs[1]:
             self.show_fields()
 
 
-    def export_data(self, rows):
+    def preview_data(self, rows):
         url = f"{self.base}/api/v2/catalog/datasets/{self.current_dataset['id']}/exports/csv/?limit={rows}&offset=0&timezone=UTC"
         response = requests.get(url)
         df = pd.read_csv(io.StringIO(response.text), sep=";")
-        st.write(f"{len(df)} records")
+        record_count = len(df) if len(df) < rows else self.record_count() 
+        st.write(f"{record_count :n} records")
         st.write(df)
 
 

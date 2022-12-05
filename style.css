@@ -30,11 +30,11 @@ div[data-testid="metric-container"] > label[data-testid="stMetricLabel"] > div {
 }
 
 /* Hide Streamlit bars */
-
+/*
 #MainMenu {
     visibility: hidden;
 }
-
+*/
 footer {
     visibility: hidden;
 }
