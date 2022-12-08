@@ -26,6 +26,7 @@ def show_info_box(catalog):
         """
     st.sidebar.markdown(IMPRESSUM, unsafe_allow_html=True)
 
+
 def init():
     def load_css():
         with open("./style.css") as f:
@@ -36,7 +37,7 @@ def init():
         page_title = MY_NAME, 
         page_icon = MY_EMOJI,
     )
-    load_css()
+    # load_css()
 
 
 def main():
@@ -50,10 +51,16 @@ def main():
             menu_icon="cast", default_index=0)
 
     if menu_action == menu_options[0]:
-        sel_city = st.selectbox("Data provider", list(CITIES.keys()),
+        sel_provider = st.selectbox("Data provider", list(CITIES.keys()),
             format_func=lambda x: CITIES[x])
-        
-        catalog = Catalog(sel_city) if 'catalog' not in st.session_state else st.session_state['catalog']
+        if 'catalog' not in st.session_state:
+            catalog = Catalog(sel_provider) 
+            st.session_state['provider'] = sel_provider
+        elif st.session_state['provider'] == sel_provider:
+            catalog = st.session_state['catalog']
+        else:
+            catalog = Catalog(sel_provider) 
+            st.session_state['provider'] = sel_provider
         catalog.set_current_record([])
         st.session_state['catalog'] = catalog
         catalog.display_header()

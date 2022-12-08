@@ -3,6 +3,7 @@ import requests
 import pandas as pd
 import io
 import locale
+import webbrowser
 
 from tools import *
 from text import *
@@ -130,7 +131,7 @@ class Catalog():
 
     def display_header(self):
         st.markdown(f"### {self.current_dataset['title']}")
-        st.markdown(self.current_dataset['description'], unsafe_allow_html=True)
+        st.markdown(self.current_dataset['description'].replace('p"','p'), unsafe_allow_html=True)
         link = f"{self.base}/explore/dataset/{self.current_dataset['id']}/table"
         st.markdown(f"[Open record at data provider]({link})")
         tabs = st.tabs(['Preview', 'Fields'])
@@ -223,4 +224,5 @@ class Catalog():
             sel_filters = clean_url_arguments(st.text_area("Filter"))
         url = get_select_url(sel_select_fields, sel_filters)
         st.write(url)
-        st.write('Click Link to download')
+        if st.button('⬇️ Download'):
+            webbrowser.open_new_tab(url)

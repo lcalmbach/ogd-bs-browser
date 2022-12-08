@@ -4,6 +4,46 @@
 
 __author__ = "lcalmbach@gmail.com"
 
+# todo
+# https://www.key-shortcut.com/en/character-tables/ascii-url-encoding#:~:text=URL%20encoding%20of%20special%20characters%20The%20standard%20for,hyphen%20%22-%22%2C%20underscore%20%22_%22%2C%20dot%20%22.%22%20and%20tilde%22~%22.
+# d = { 'actual character ':'replacement ',...}
+# df.columns = df.columns.to_series().replace(d, regex=True)
+
+url_enc_replacement_chars = {
+' ': '20%',
+'!': '21%',
+'"': '22%',
+'#': '23%',
+'$': '24%',
+'%': '25%',
+'&': '26%',
+"'": '27%',
+'(': '28%',
+')': '29%',
+'*': '%2A',
+'+': '%2B',
+',': '%2C',
+'/': '%2F',
+':': '%3A',
+';': '%3B',
+'=': '%3D',
+'?': '%3F',
+'@': '40%',
+'[': '%5B',
+']': '%5D',
+'^': '%5E',
+'`': '%60',
+'<': '%3C',
+'>': '%3E',
+'@': '%40',
+'ä': '%E4',
+'ö': '%F6',
+'ü': '%FC',
+'Ä': '%C4',
+'Ö': '%D6',
+'Ü': '%DC',
+}
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -228,3 +268,4 @@ def clean_url_arguments(url):
     url = clean_url(url)
     url = url.replace('=', '%3D')
     return url
+
