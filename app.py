@@ -6,13 +6,14 @@ from ods_catalog import *
 from config import *
 
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 __author__ = 'Lukas Calmbach'
 __author_email__ = 'lcalmbach@gmail.com'
-VERSION_DATE = '2022-12-05'
+VERSION_DATE = '2022-12-08'
 MY_EMOJI = '🔭'
 MY_NAME = f'ODS Data Explorer'
 GIT_REPO = 'https://github.com/lcalmbach/ogd-bs-browser'
+APP_URL = 'https://lcalmbach-ogd-bs-browser-app-as449l.streamlit.app/'
 
 def show_info_box(catalog):
     IMPRESSUM = f"""<div style="background-color:#34282C; padding: 10px;border-radius: 15px; border:solid 1px white;">
@@ -40,19 +41,19 @@ def init():
 
 def main():
     init()
-    menu_options = ["Select Dataset", "Aggregate"]
+    menu_options = ["Select Dataset", "Aggregate", "Export"]
     with st.sidebar:
         st.markdown(f"## {MY_EMOJI} {MY_NAME}")
+        # https://fonts.google.com/icons
         menu_action = option_menu(None, menu_options, 
-            icons=['search', 'table', ], 
+            icons=['search', 'table', 'download'], 
             menu_icon="cast", default_index=0)
 
     if menu_action == menu_options[0]:
         sel_city = st.selectbox("Data provider", list(CITIES.keys()),
             format_func=lambda x: CITIES[x])
         
-        catalog = Catalog(sel_city)
-        # sel_themes =  st.selectbox("🔎Themes", options=[ALL_THEMES] + catalog.themes)
+        catalog = Catalog(sel_city) if 'catalog' not in st.session_state else st.session_state['catalog']
         catalog.set_current_record([])
         st.session_state['catalog'] = catalog
         catalog.display_header()
@@ -60,7 +61,8 @@ def main():
         catalog = st.session_state['catalog'] 
         catalog.show_summarized_data()
     elif menu_action == menu_options[2]:
-        st.write('Export')
+        catalog = st.session_state['catalog'] 
+        catalog.show_export()
     show_info_box(catalog)
     
 

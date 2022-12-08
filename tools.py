@@ -220,3 +220,11 @@ def add_time_columns(df_data):
     df['stunde'] = pd.to_datetime(df['zeit']).dt.hour
     df['tag'] = df['zeit'].dt.day
     return df
+
+def clean_url(url):
+    return url.replace('"', '%22').replace("'", '%22').replace(" ", '%20').replace("<", '%3C').replace('>', '%3E')
+
+def clean_url_arguments(url):
+    url = clean_url(url)
+    url = url.replace('=', '%3D')
+    return url

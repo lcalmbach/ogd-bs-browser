@@ -79,9 +79,6 @@ class Catalog():
         return df
 
     
-    
-
-
     def set_current_record(self, themes):
         def filter_for_title(find_expression):
             df = self.datasets
@@ -195,3 +192,35 @@ class Catalog():
                     "text/csv",
                     key='download-csv'
                 )
+    
+    
+    def show_export(self):
+        def get_select_url(select_fields, filter):
+            
+            url = f"{self.base}/api/v2/catalog/datasets/{self.current_dataset['id']}/exports/csv/?limit=-1&timezone=UTC"
+            if select_fields:
+                select_fields_expr = ','.join(select_fields)
+                url += f"&select={select_fields_expr}"
+            if filter:
+                #filter_expr = ','.join(filter)
+                url += f"&where={filter}"
+            # url = f"https://data.bs.ch/explore/dataset/{self.current_dataset['id']}/download/?format=csv&timezone=Europe/Berlin&lang=de&csv_separator=%3B&select={select_fields_expr}"
+            url = clean_url(url)
+            return url
+
+        st.write(f"**Export dataset: {self.current_dataset['title']}**")
+        with st.sidebar.expander("⚙️ Select:", expanded=True):
+            sel_select_fields = st.multiselect("Fields", self.fields)
+        with st.sidebar.expander("⚙️ Filter:", expanded=True):
+            cols = st.columns([2,1,2])
+            """with cols[0]:
+                sel_field = st.selectbox("Fields", self.fields)
+            with cols[1]:
+                sel_op = st.selectbox("", ['like','=','<','>'])
+            with cols[2]:
+                sel_value = st.text_input("Value")
+            sel_filters = clean_url(f"{sel_field} {sel_op} {sel_value}")"""
+            sel_filters = clean_url_arguments(st.text_area("Filter"))
+        url = get_select_url(sel_select_fields, sel_filters)
+        st.write(url)
+        st.write('Click Link to download')
