@@ -2,6 +2,9 @@
     Collection of useful functions.
 """
 
+import random, string
+
+
 __author__ = "lcalmbach@gmail.com"
 
 # todo
@@ -57,32 +60,6 @@ def get_cs_item_list(lst, separator=',', quote_string=""):
     for item in lst:
         result += quote_string + str(item) + quote_string + separator
     result = result[:-1]
-    return result
-
-
-def get_pivot_data(df, group_by):
-    """
-    Returns a pivot table from the raw data table. df must include the station name, the data column and the
-    group by column. Example
-    input:
-    ¦Station¦date       ¦parameter  ¦value  ¦
-    -----------------------------------------
-    ¦MW1    ¦1/1/2001   ¦calcium    ¦10     ¦
-    ¦MW1    ¦1/1/2001   ¦chloride   ¦21     ¦
-
-    output:
-    ¦Station¦date       ¦calcium    ¦chloride   ¦
-    ---------------------------------------------
-    ¦MW1    ¦1/1/2001   ¦10         ¦21         ¦
-
-    :param df:          dataframe holding the data to be pivoted
-    :param group_by:
-    :return:
-    """
-
-    result = pd.pivot_table(df, values=cn.VALUES_VALUE_COLUMN, index=[cn.SAMPLE_DATE_COLUMN, cn.STATION_NAME_COLUMN,
-                                                                      group_by], columns=[cn.PAR_NAME_COLUMN],
-                            aggfunc=np.average)
     return result
 
 
@@ -262,10 +239,30 @@ def add_time_columns(df_data):
     return df
 
 def clean_url(url):
-    return url.replace('"', '%22').replace("'", '%22').replace(" ", '%20').replace("<", '%3C').replace('>', '%3E')
+    return url.replace('"', '%22').replace("'", '%27').replace(" ", '%20').replace("<", '%3C').replace('>', '%3E')
 
 def clean_url_arguments(url):
     url = clean_url(url)
     url = url.replace('=', '%3D')
     return url
 
+
+def randomword(length):
+    letters = string.ascii_lowercase
+    return ''.join(random.choice(letters) for i in range(length))
+
+def show_download_button(df:pd.DataFrame, cfg: dict={}):
+    if 'button_text' not in cfg:
+        cfg['button_text'] = "Download table"
+    if 'filename' not in cfg:
+        cfg['filename'] = "file.csv"
+    key = randomword(10)
+
+    csv = df.to_csv(index=False).encode('utf-8')
+    st.download_button(
+        label=cfg["button_text"],
+        data=csv,
+        file_name=cfg['filename'],
+        mime="text/csv",
+        key=key
+    )

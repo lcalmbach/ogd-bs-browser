@@ -6,10 +6,10 @@ from ods_catalog import *
 from config import *
 
 
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 __author__ = 'Lukas Calmbach'
 __author_email__ = 'lcalmbach@gmail.com'
-VERSION_DATE = '2022-12-08'
+VERSION_DATE = '2022-12-11'
 MY_EMOJI = '🔭'
 MY_NAME = f'ODS Data Explorer'
 GIT_REPO = 'https://github.com/lcalmbach/ogd-bs-browser'
@@ -21,13 +21,13 @@ def show_info_box(catalog):
         data from: Various OpendataSoft Data Providers<br>
         version: {__version__} ({VERSION_DATE})<br>
         <a href="{GIT_REPO}">git-repo</a><br>
-        Current base: {catalog.base}<br>
-        Current dataset: {catalog.current_dataset['id']}<br>
+        Current provider: {PROVIDERS[catalog.base]}<br>
+        Current dataset: {catalog.current_dataset.id}<br>
         """
     st.sidebar.markdown(IMPRESSUM, unsafe_allow_html=True)
 
 
-def init():
+def init_layout():
     def load_css():
         with open("./style.css") as f:
             st.markdown('<style>{}</style>'.format(f.read()), unsafe_allow_html=True)
@@ -37,12 +37,17 @@ def init():
         page_title = MY_NAME, 
         page_icon = MY_EMOJI,
     )
-    # load_css()
+    load_css()
 
+def init_settings():
+    if 'provider' not in st.session_state:
+        st.session_state['provider'] = list(PROVIDERS.keys())[0]
+        st.session_state['catalog'] = Catalog(st.session_state['provider']) 
 
 def main():
-    init()
-    menu_options = ["Select Dataset", "Aggregate", "Export"]
+    init_layout()
+    init_settings()
+    menu_options = ["Select Dataset", "Query"]
     with st.sidebar:
         st.markdown(f"## {MY_EMOJI} {MY_NAME}")
         # https://fonts.google.com/icons
@@ -51,25 +56,24 @@ def main():
             menu_icon="cast", default_index=0)
 
     if menu_action == menu_options[0]:
-        sel_provider = st.selectbox("Data provider", list(CITIES.keys()),
-            format_func=lambda x: CITIES[x])
-        if 'catalog' not in st.session_state:
-            catalog = Catalog(sel_provider) 
-            st.session_state['provider'] = sel_provider
-        elif st.session_state['provider'] == sel_provider:
+        index = list(PROVIDERS.keys()).index(st.session_state['provider'])
+        sel_provider = st.selectbox("Data provider",
+            list(PROVIDERS.keys()), 
+            format_func=lambda x: PROVIDERS[x],
+            index=index
+        )
+        if st.session_state['provider'] == sel_provider:
             catalog = st.session_state['catalog']
         else:
             catalog = Catalog(sel_provider) 
             st.session_state['provider'] = sel_provider
-        catalog.set_current_record([])
+            st.write(st.session_state['provider'])
+        catalog.set_current_record()
         st.session_state['catalog'] = catalog
-        catalog.display_header()
+        catalog.current_dataset.display_header()
     elif menu_action == menu_options[1]:
         catalog = st.session_state['catalog'] 
-        catalog.show_summarized_data()
-    elif menu_action == menu_options[2]:
-        catalog = st.session_state['catalog'] 
-        catalog.show_export()
+        catalog.current_dataset.display_query_result()
     show_info_box(catalog)
     
 
