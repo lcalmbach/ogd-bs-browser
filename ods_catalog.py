@@ -211,7 +211,7 @@ class WhereExpression():
     value: str = ''
 
 class Query():
-    def __init__(self, ds: object, json_query: str | None):
+    def __init__(self, ds: object, json_query: str):
         self.ds: dict = ds
         self.is_groupby: bool = False
         self.all_fields_list: list = list(ds.fields_df['name'])
