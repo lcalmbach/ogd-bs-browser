@@ -159,8 +159,6 @@ class Dataset():
 
     def display_header(self):
         st.markdown(f"### {self.title}")
-        link = f"{self.parent.base}/explore/dataset/{self.id}/table"
-        st.markdown(f"[Open record at data provider]({link})")
         tabs = st.tabs(['Description', 'Preview', 'Fields'])
         with tabs[0]:
             st.markdown(self.description, unsafe_allow_html=True)
@@ -215,7 +213,7 @@ class Query():
         self.ds: dict = ds
         self.is_groupby: bool = False
         self.all_fields_list: list = list(ds.fields_df['name'])
-        self.group_fields_options: list = list(ds.fields_df[ds.fields_df['type'].isin(['text', 'int'])]['name'])
+        self.group_fields_options: list = list(ds.fields_df[ds.fields_df['type'].isin(['text', 'int', 'date'])]['name'])
         self.value_fields_options: list = list(ds.fields_df[ds.fields_df['type'] != 'text']['name'])
         self.url: str = ''
         self.url_count: str = ''
@@ -264,7 +262,7 @@ class Query():
                 with cols[0]:
                     item.field = st.selectbox("Field", options=self.all_fields_list, label_visibility='collapsed', key=f'fld{id}')
                 with cols[1]:
-                    item.comp = st.selectbox("Op", options=['=','<','>','like'], label_visibility='collapsed', key=f'comp{id}')
+                    item.comp = st.selectbox("Op", options=COMPARE_OPERATORS, label_visibility='collapsed', key=f'comp{id}')
                 with cols[2]:
                     item.value = st.text_input("Value", label_visibility='collapsed', key=f'val{id}')
                 with cols[3]:
@@ -405,3 +403,10 @@ class Query():
         df = pd.concat(df_list)
         df.reset_index(drop=True, inplace=True)
         return df, ok
+
+def display_info_page():
+    list = [f"<li>[{PROVIDERS[x]}]({x})</li>" for x in PROVIDERS.keys()]
+    list = [f'<li><a href="{PROVIDERS[x]}">{x}<a></li>' for x in PROVIDERS.keys()]
+    list = ''.join(list)
+    list = f"<ul>{list}</ul><p><p>"
+    st.markdown(about.format(list), unsafe_allow_html=True)
