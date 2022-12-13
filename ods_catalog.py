@@ -289,7 +289,7 @@ class Query():
         def sql_literal(value, field_name):
             _df = self.ds.fields_df
             type = _df[_df['name'] == field_name].iloc[0]['type']
-            if type == 'date':
+            if type in ['date', 'datetime']:
                 result = f"date'{value}'"
             elif type == 'text':
                 result = f'"{value}"'
@@ -405,8 +405,9 @@ class Query():
         return df, ok
 
 def display_info_page():
-    list = [f"<li>[{PROVIDERS[x]}]({x})</li>" for x in PROVIDERS.keys()]
-    list = [f'<li><a href="{x}">{PROVIDERS[x]}<a></li>' for x in PROVIDERS.keys()]
+    providers = sort_dict(PROVIDERS, 1)
+    list = [f"<li>[{providers[x]}]({x})</li>" for x in providers.keys()]
+    list = [f'<li><a href="{x}">{providers[x]}<a></li>' for x in providers.keys()]
     list = ''.join(list)
     list = f"<ul>{list}</ul><p><p>"
     st.markdown(about.format(list), unsafe_allow_html=True)

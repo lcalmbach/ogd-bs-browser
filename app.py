@@ -44,8 +44,9 @@ def init_layout():
 
 def init_settings():
     if 'provider' not in st.session_state:
-        st.session_state['provider'] = list(PROVIDERS.keys())[0]
+        st.session_state['provider'] = DEFAULT_PROVIDER
         st.session_state['catalog'] = Catalog(st.session_state['provider']) 
+
 
 def main():
     init_layout()
@@ -59,10 +60,11 @@ def main():
             menu_icon="cast", default_index=0)
 
     if menu_action == menu_options[0]:
-        index = list(PROVIDERS.keys()).index(st.session_state['provider'])
+        provider_options= sort_dict(PROVIDERS, 1)
+        index = list(provider_options.keys()).index(st.session_state['provider'])
         sel_provider = st.selectbox("Data provider",
-            list(PROVIDERS.keys()), 
-            format_func=lambda x: PROVIDERS[x],
+            options=list(provider_options.keys()), 
+            format_func=lambda x: provider_options[x],
             index=index
         )
         if st.session_state['provider'] == sel_provider:

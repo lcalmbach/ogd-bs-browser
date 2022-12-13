@@ -266,3 +266,14 @@ def show_download_button(df:pd.DataFrame, cfg: dict={}):
         mime="text/csv",
         key=key
     )
+
+def sort_dict(dict_to_sort:dict, sort_by_col)->dict:
+    lst = sorted(dict_to_sort.items(), key=lambda x:x[sort_by_col])
+    result = {x[0]: x[1] for x in lst}
+    return result
+
+def sort_object_list(lst: list, sort_field: str, reverse: bool=False)->list:
+    """
+    https://www.techiedelight.com/sort-list-of-objects-python/#:~:text=A%20simple%20solution%20is%20to%20use%20the%20list.sort,accepts%20two%20optional%20keyword-only%20arguments%3A%20key%20and%20reverse.
+    """
+    lst.sort(key=lambda x: x[sort_field], reverse=reverse)
