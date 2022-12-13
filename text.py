@@ -12,7 +12,7 @@ about = """
 #### 🔎Select Dataset
 In the main window, select one of the following data providers:
 {}
-Don't hesitate to contact the author if you wish to see other sites included in the list.
+Don't hesitate to contact the <a href="mailto:lcalmbach@gmail.com">author</a> if you wish to see other sites included in the list, if you find issues in the application or if you have suggestions of useful features.
 
 In the box below the data provider, all available datasets for the data providers are displayed. You may filter the results by entering an expression in the title, by one or several themes, or by the datasets displayed in the last n days. The dataset list shows the id (unique dataset identifier), title, and issue date. You may sort the list according to any of these fields by clicking on the respective field in the header row.
 
