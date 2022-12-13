@@ -1,12 +1,12 @@
 INFO = """Selecting a data provider fill the datasets grid with the available datasets for this provider. Select a record from the grid to display a summary of the dataset. When clicking on the link "open record at data provider" the dataset will be opened on the data providers ODS site. """
 
 about = """
-# About ODS Data Explorer 🚧
+# About ODS Data Explorer
 [Opendatasoft](https://www.opendatasoft.com/) is a French company that offers data-sharing software. Opendatasoft has developed a tool for sharing and reusing the data of companies and public administrations ([more](https://en.wikipedia.org/wiki/OpenDataSoft)). 
 
 `🔭ODS Data Explorer` is a non-commerical metadata-driven tool that has been independently developed to gain faster and more efficient access to ODS sites for specific tasks. The program is built on the ODS REST v2 API and uses ODSQL, which brings SQL-like database query features to the tool. Filtering and aggregation of data may spare you from downloading large quantities of data if you are interested in daily or monthly averages, minima, maxima, etc., of high-frequency data. 
 
-🔭ODS Data Explorer has foremost been built with the intention to gain insight and learn from other ODS sites and is not meant and cannot replace the original Opendatasoft portal software. It can, however, in some aspects supplement it.
+🔭ODS Data Explorer has been primarily developed to gain insight and learn from other ODS sites and is not meant and cannot replace the original Opendatasoft portal software. Hopefully, it can supplement it in some circumstances.
 
 ### Menu:
 #### 🔎Select Dataset
