@@ -7,6 +7,8 @@ import webbrowser
 from dataclasses import dataclass
 import boto3
 from boto3.dynamodb.conditions import Key
+import socket
+import configparser
 
 from tools import *
 from text import *
@@ -14,48 +16,62 @@ from config import *
 
 
 locale.setlocale(locale.LC_ALL, "")
+cfg = configparser.ConfigParser()
+cfg.read('aws_credentials.cfg')
 
-class Subscription():
+hostname = socket.gethostname()
+if hostname.lower() == 'liestal':
+    aws_access_key_id = cfg['default']['aws_access_key_id']
+    aws_secret_access_key = cfg['default']['aws_secret_access_key']
+else:
+    aws_access_key_id = st.secrets['aws_access_key_id']
+    aws_secret_access_key = st.secrets['aws_secret_access_key']
+dynamodb = boto3.client(
+    "dynamodb",
+    region_name="eu-central-1",
+    aws_access_key_id=aws_access_key_id,
+    aws_secret_access_key=aws_secret_access_key,
+)
+
+
+class Subscription:
     """
     see: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/dynamodb.html
     """
+
     def __init__(self, email, catalog):
-        self.table_name = 'ods_subscription'
+        self.table_name = "ods_subscription"
         self.email = email
         self.catalog = catalog
     
-    def unsubscribe(self):
-        dynamodb = boto3.resource('dynamodb')
-        table = dynamodb.Table(self.table_name)
-        response = table.delete_item(
-            Key={
-                'email': self.email,
-                'catalog': self.catalog
-            }
+    @property
+    def dynamodb_table(self):
+        dynamodb_resource = boto3.resource(
+            "dynamodb",
+            region_name="eu-central-1",
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
         )
-        st.success(f'You were successfully unsuscribed to the catalog {self.catalog}')
-    
+        return dynamodb_resource.Table(self.table_name)
+
+    def unsubscribe(self):
+        response = self.dynamodb_table.delete_item(Key={"email": self.email, "catalog": self.catalog})
+        st.success(f"You were successfully unsuscribed to the catalog {self.catalog}")
+
     def subscribe(self):
-        dynamodb = boto3.client('dynamodb')
         created_date = datetime.now().strftime("%Y-%m-%d H:M")
         item = {
-            'email': {'S': self.email},
-            'catalog':{'S': self.catalog},
-            'created_date':{'S': created_date},
+            "email": {"S": self.email},
+            "catalog": {"S": self.catalog},
+            "created_date": {"S": created_date},
         }
-        response = dynamodb.put_item(TableName='ods_subscription', Item=item) 
-        st.success(f'You were successfully suscribed to the catalog {self.catalog}')
+        response = dynamodb.put_item(TableName="ods_subscription", Item=item)
+        st.success(f"You were successfully suscribed to the catalog {self.catalog}")
 
     def has_subscription(self):
-        dynamodb_resource = boto3.resource('dynamodb')
-        table = dynamodb_resource.Table(self.table_name)
-        response = table.get_item(
-            Key={
-                'email': self.email,
-                'catalog': self.catalog
-            }
-        )
-        return ('Item' in response)
+        response = self.dynamodb_table.get_item(Key={"email": self.email, "catalog": self.catalog})
+        return "Item" in response
+
 
 class Catalog:
     def __init__(self, base):
@@ -68,30 +84,35 @@ class Catalog:
         self.filters = []
         self.agg_func = SUMMARY_FUNCTIONS[0]
         self.filter_expression = ""
-    
+
     def save_to_db(self, email_address, info_new_datasets, dataset_to_add):
-        dynamodb = boto3.client('dynamodb')
         created_date = datetime.now().strftime("%Y-%m-%d %H:%M")
         for dataset in dataset_to_add:
             catalog_dataset = f"{self.base}/{dataset}"
             item = {
-                'email': {'S': email_address},
-                'catalog':{'S': self.base},
+                "email": {"S": email_address},
+                "catalog": {"S": self.base},
             }
-            response = dynamodb.put_item(TableName='ods_subscription', Item=item) 
+            response = dynamodb.put_item(TableName="ods_subscription", Item=item)
             st.write(item, response)
 
     def subscribe(self):
         st.markdown("## Subscribe for new Datasets")
-        st.markdown("Enter your email and check the checkbox below if you wish to be nofified, if this catalog publishes a new dataset.")
-        
+        st.markdown(
+            "Enter your email and check the checkbox below if you wish to be notified if this catalog publishes a new dataset."
+        )
+
         mail_address = st.text_input("Email", None)
-        if mail_address > '':
+        if mail_address != 'None':
             subscription = Subscription(mail_address, self.base)
-            info_new_datasets = st.checkbox(label="Send mail for new datasets in current catalog", value=True)
+            info_new_datasets = st.checkbox(
+                label="Send mail for new datasets in current catalog", value=True
+            )
             if subscription.has_subscription():
-                st.write('You already are subscribed to this provider, uncheck the checkbox above to unscribe.')
-            if st.button('Execute'):
+                st.write(
+                    "You already are subscribed to this provider, uncheck the checkbox above to unscribe."
+                )
+            if st.button("Execute"):
                 if subscription.has_subscription() and not info_new_datasets:
                     subscription.unsubscribe()
                 elif not subscription.has_subscription() and info_new_datasets:
@@ -268,7 +289,7 @@ class Dataset:
 
     def display_header(self):
         st.markdown(f"### {self.title}")
-        tabs = st.tabs(["Description", "Preview", "Fields", 'Gugus'])
+        tabs = st.tabs(["Description", "Preview", "Fields", "Gugus"])
         with tabs[0]:
             st.markdown(self.description, unsafe_allow_html=True)
         with tabs[1]:
