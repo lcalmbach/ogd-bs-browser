@@ -1,5 +1,7 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
+import requests
+import json
 
 from tools import *
 from ods_catalog import *
@@ -16,10 +18,19 @@ GIT_REPO = "https://github.com/lcalmbach/ogd-bs-browser"
 APP_URL = "https://lcalmbach-ogd-bs-browser-app-as449l.streamlit.app/"
 
 
+def get_providers()->dict:
+    response = requests.get(PROVIDERS_URL)
+    if response.status_code == 200:
+        data = response.json()
+        return data
+    else:
+        print("Error: Failed to retrieve catalog data from the URL.")
+    
+
 def show_info_box():
     catalog = st.session_state["catalog"]
     ds_link = f"{catalog.base}/explore/dataset/{catalog.current_dataset.id}"
-    text = f"""Current provider: [{PROVIDERS[catalog.base]}]({catalog.base})<br>
+    text = f"""Current provider: [{st.session_state["providers_dict"][catalog.base]}]({catalog.base})<br>
         Current dataset: [{catalog.current_dataset.id}]({ds_link})<br><br>"""
     st.sidebar.markdown(text, unsafe_allow_html=True)
     impressum = f"""<div style="background-color:#34282C; padding: 10px;border-radius: 15px; border:solid 1px white;">
@@ -47,13 +58,17 @@ def init_layout():
 def init_settings():
     if "provider" not in st.session_state:
         st.session_state["provider"] = DEFAULT_PROVIDER
+        st.session_state["providers_dict"] = get_providers()
         st.session_state["catalog"] = Catalog(st.session_state["provider"])
+        st.session_state["email_address"] = ''
+        
+        
 
 
 def main():
     init_layout()
     init_settings()
-    menu_options = ["Select Dataset", "Query", "Register for updates", "About"]
+    menu_options = ["Select Dataset", "Query", "Subscriptions", "About"]
     with st.sidebar:
         st.markdown(f"## {MY_EMOJI} {MY_NAME}")
         # https://fonts.google.com/icons
@@ -66,7 +81,7 @@ def main():
         )
 
     if menu_action == menu_options[0]:
-        provider_options = sort_dict(PROVIDERS, 1)
+        provider_options = sort_dict(st.session_state["providers_dict"], 1)
         index = list(provider_options.keys()).index(st.session_state["provider"])
         sel_provider = st.selectbox(
             "Data provider",
@@ -91,7 +106,7 @@ def main():
         catalog.subscribe()
     elif menu_action == menu_options[3]:
         catalog = st.session_state["catalog"]
-        display_info_page()
+        catalog.display_info_page()
     show_info_box()
 
 

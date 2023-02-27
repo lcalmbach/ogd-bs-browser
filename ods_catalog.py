@@ -76,6 +76,7 @@ class Subscription:
 class Catalog:
     def __init__(self, base):
         self.base = base
+        self.providers = st.session_state["providers_dict"]
         self.datasets = self.get_datasets()
         self.current_dataset = Dataset(self.datasets.iloc[0], self)
         self.fields = []
@@ -84,6 +85,14 @@ class Catalog:
         self.filters = []
         self.agg_func = SUMMARY_FUNCTIONS[0]
         self.filter_expression = ""
+
+    def display_info_page(self):
+        self.providers = sort_dict(self.providers, 1)
+        list = [f"<li>[{self.providers[x]}]({x})</li>" for x in self.providers.keys()]
+        list = [f'<li><a href="{x}">{self.providers[x]}</a></li>' for x in self.providers.keys()]
+        list = "".join(list)
+        list = f"<ul>{list}</ul><p><p>"
+        st.markdown(about.format(len(self.providers), list), unsafe_allow_html=True)
 
     def save_to_db(self, email_address, info_new_datasets, dataset_to_add):
         created_date = datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -94,23 +103,22 @@ class Catalog:
                 "catalog": {"S": self.base},
             }
             response = dynamodb.put_item(TableName="ods_subscription", Item=item)
-            st.write(item, response)
 
     def subscribe(self):
-        st.markdown("## Subscribe for new Datasets")
+        st.markdown("## Subscribe for Update Notifications")
         st.markdown(
-            "Enter your email and check the checkbox below if you wish to be notified if this catalog publishes a new dataset."
+            f"Enter your email and check the checkbox below if you wish to be notified when the provider **{self.providers[self.base]}** publishes a new dataset."
         )
 
-        mail_address = st.text_input("Email", None)
-        if mail_address != 'None':
-            subscription = Subscription(mail_address, self.base)
+        st.session_state["email_address"] = st.text_input("Email", value=st.session_state["email_address"])
+        if st.session_state["email_address"] != '':
+            subscription = Subscription(st.session_state["email_address"], self.base)
             info_new_datasets = st.checkbox(
                 label="Send mail for new datasets in current catalog", value=True
             )
             if subscription.has_subscription():
-                st.write(
-                    "You already are subscribed to this provider, uncheck the checkbox above to unscribe."
+                st.info(
+                    "You already are subscribed to this provider, uncheck the checkbox above and press the `Execute` button to unscribe."
                 )
             if st.button("Execute"):
                 if subscription.has_subscription() and not info_new_datasets:
@@ -133,7 +141,6 @@ class Catalog:
 
     def get_datasets(self):
         url = f"{self.base}/api/v2/catalog/exports/json?limit=-1&offset=0&timezone=UTC"
-        # st.write(url)
         response = requests.get(url)
         df = pd.DataFrame()
         if response.status_code == 200:
@@ -206,7 +213,7 @@ class Catalog:
                 df = filter_for_dates(df, date_filter)
             settings = get_table_settings(df)
 
-            st.write(f"{PROVIDERS[self.base]} has {len(df)} datasets")
+            st.markdown(f"{self.providers[self.base]} has {len(df)} datasets")
             cols = [
                 {
                     "name": "id",
@@ -553,7 +560,6 @@ class Query:
             if num_of_records < MAX_QUERY_RECORDS
             else int(MAX_QUERY_RECORDS / QUERY_INCREMENT)
         )
-        st.write()
         for num in range(0, loops):
             response = requests.get(self.url.format(num * QUERY_INCREMENT))
             df, ok = pd.DataFrame, True
@@ -572,12 +578,3 @@ class Query:
         df = pd.concat(df_list)
         df.reset_index(drop=True, inplace=True)
         return df, ok
-
-
-def display_info_page():
-    providers = sort_dict(PROVIDERS, 1)
-    list = [f"<li>[{providers[x]}]({x})</li>" for x in providers.keys()]
-    list = [f'<li><a href="{x}">{providers[x]}<a></li>' for x in providers.keys()]
-    list = "".join(list)
-    list = f"<ul>{list}</ul><p><p>"
-    st.markdown(about.format(list), unsafe_allow_html=True)

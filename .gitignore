@@ -1,3 +1,4 @@
 env
+.archive
 test.py
 *.cfg

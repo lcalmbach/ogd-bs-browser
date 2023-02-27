@@ -4,22 +4,23 @@ about = """
 # About ODS Data Explorer
 [Opendatasoft](https://www.opendatasoft.com/) is a French company that offers data-sharing software. Opendatasoft has developed a tool for sharing and reusing the data of companies and public administrations ([more](https://en.wikipedia.org/wiki/OpenDataSoft)). 
 
-`🔭ODS Data Explorer` is a non-commerical metadata-driven tool that has been independently developed to gain faster and more efficient access to ODS sites for specific tasks. The program is built on the ODS REST v2 API and uses ODSQL, which brings SQL-like database query features to the tool. Filtering and aggregation of data may spare you from downloading large quantities of data if you are interested in daily or monthly averages, minima, maxima, etc., of high-frequency data. 
+`🔭ODS Data Explorer` is a non-commerical metadata-driven tool that has been developed as a utiltiy, to gain faster and more efficient access to ODS sites for specific tasks. The program is built on the ODS REST v2 API and uses ODSQL, which brings SQL-like database query features to the tool. Filtering and aggregation of data may spare you from downloading large quantities of data if you are interested in daily or monthly averages, minima, maxima, etc., of high-frequency data.
 
 🔭ODS Data Explorer has been primarily developed to gain insight and learn from other ODS sites and is not meant and cannot replace the original Opendatasoft portal software. Hopefully, it can supplement it in some circumstances.
 
 ### Menu:
 #### 🔎Select Dataset
-In the main window, select one of the following data providers:
+In the main window, select one of the following {} data providers:
 {}
-Don't hesitate to contact the <a href="mailto:lcalmbach@gmail.com">author</a> if you wish to see other sites included in the list, if you find issues in the application or if you have suggestions of useful features.
+
+suggestions for missing features.
 
 In the box below the data provider, all available datasets for the data providers are displayed. You may filter the results by entering an expression in the title, by one or several themes, or by the datasets displayed in the last n days. The dataset list shows the id (unique dataset identifier), title, and issue date. You may sort the list according to any of these fields by clicking on the respective field in the header row.
 
-Click on a record in the dataset list to load the respective metadata. The title of the dataset shows up below the dataset list, and its main metadata is displayed on three tabs:
+Click on a record in the dataset list to load the respective metadata. The title of the dataset shows up below the dataset list, and its primary metadata is displayed on three tabs:
 - Description: gives the introductory information shown on the information tab in the original ODS portal.
-- Preview displays the first 1000 rows of the dataset and also shows the number of total records in the case where the number of records exceeds 1000.
-- Fields: displays name, description, label, and type for each field
+- Preview displays the first 1000 rows of the dataset and shows the number of total records in the case where the number of records exceeds 1000.
+- Fields: displays name, description, label, and type for each field.
 
 #### Query
 The original ODS portal software allows convenient filtering for predefined fields and downloading the full or filtered dataset. ODS Data Explorer allows, in addition, filtering for all fields and aggregating data. 
