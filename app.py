@@ -84,7 +84,7 @@ def main():
         provider_options = sort_dict(st.session_state["providers_dict"], 1)
         index = list(provider_options.keys()).index(st.session_state["provider"])
         sel_provider = st.selectbox(
-            "Data provider",
+            "Select a data provider (catalog)",
             options=list(provider_options.keys()),
             format_func=lambda x: provider_options[x],
             index=index,
