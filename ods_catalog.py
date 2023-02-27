@@ -59,7 +59,7 @@ class Subscription:
         st.success(f"You were successfully unsuscribed to the catalog {self.catalog}")
 
     def subscribe(self):
-        created_date = datetime.now().strftime("%Y-%m-%d H:M")
+        created_date = datetime.now().strftime(FORMAT_YMD_HM)
         item = {
             "email": {"S": self.email},
             "catalog": {"S": self.catalog},
@@ -95,7 +95,7 @@ class Catalog:
         st.markdown(about.format(len(self.providers), list), unsafe_allow_html=True)
 
     def save_to_db(self, email_address, info_new_datasets, dataset_to_add):
-        created_date = datetime.now().strftime("%Y-%m-%d %H:%M")
+        created_date = datetime.now().strftime(FORMAT_YMD_HM)
         for dataset in dataset_to_add:
             catalog_dataset = f"{self.base}/{dataset}"
             item = {

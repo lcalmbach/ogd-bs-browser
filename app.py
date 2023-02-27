@@ -8,10 +8,10 @@ from ods_catalog import *
 from config import *
 
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __author__ = "Lukas Calmbach"
 __author_email__ = "lcalmbach@gmail.com"
-VERSION_DATE = "2023-25-02"
+VERSION_DATE = "2023-27-02"
 MY_EMOJI = "🔭"
 MY_NAME = f"ODS Data Explorer"
 GIT_REPO = "https://github.com/lcalmbach/ogd-bs-browser"
