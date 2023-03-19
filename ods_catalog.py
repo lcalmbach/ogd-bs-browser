@@ -145,11 +145,11 @@ class Catalog:
                 msg = ''
                 with cols[0]:
                     if st.form_submit_button('Subscribe'):
-                        for catalog in list(self.providers.keys()):
+                        for catalog in list(catalogs.keys()):
                             if checkboxes[catalog] and catalog not in account.subscriptions:
                                 account.subscribe(catalog)
                                 n_subscribed +=1
-                        for catalog in list(self.providers.keys()):
+                        for catalog in list(catalogs.keys()):
                             if not checkboxes[catalog] and catalog in account.subscriptions:
                                 account.unsubscribe(catalog)
                                 n_unsubscribed += 1
@@ -157,7 +157,7 @@ class Catalog:
 
                 with cols[1]:
                     if st.form_submit_button('Subscribe to all'):
-                        for catalog in list(self.providers.keys()):
+                        for catalog in list(catalogs.keys()):
                             if catalog not in account.subscriptions:
                                 account.subscribe(catalog)
                                 n_subscribed +=1
@@ -165,7 +165,7 @@ class Catalog:
                         rerun = True
                 with cols[2]:
                     if st.form_submit_button('Unscubscribe from all'):
-                        for catalog in list(self.providers.keys()):
+                        for catalog in list(catalogs.keys()):
                             if catalog in account.subscriptions:
                                 account.unsubscribe(catalog)
                                 n_unsubscribed += 1
