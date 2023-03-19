@@ -1,5 +1,3 @@
-
-PROVIDERS_URL = "https://ods-browser-bucket.s3.eu-central-1.amazonaws.com/ods-catalogs.json"
 SUMMARY_FUNCTIONS = ["sum", "avg", "count", "max", "min", "median"]
 COMPARE_OPERATORS = ["=", "<", "<=", ">", ">=", "!=", "like", "in"]
 ALL_THEMES = "<select a theme>"

@@ -8,24 +8,27 @@ from ods_catalog import *
 from config import *
 
 
-__version__ = "0.1.1"
+__version__ = "0.2.0"
 __author__ = "Lukas Calmbach"
 __author_email__ = "lcalmbach@gmail.com"
-VERSION_DATE = "2023-27-02"
+VERSION_DATE = "2023-19-03"
 MY_EMOJI = "🔭"
-MY_NAME = f"ODS Data Explorer"
+MY_NAME = f"ODS-Data-Explorer"
 GIT_REPO = "https://github.com/lcalmbach/ogd-bs-browser"
 APP_URL = "https://lcalmbach-ogd-bs-browser-app-as449l.streamlit.app/"
+PROVIDERS_URL = (
+    "https://ods-browser-bucket.s3.eu-central-1.amazonaws.com/ods-catalogs.json"
+)
 
 
-def get_providers()->dict:
+def get_providers() -> dict:
     response = requests.get(PROVIDERS_URL)
     if response.status_code == 200:
         data = response.json()
         return data
     else:
         print("Error: Failed to retrieve catalog data from the URL.")
-    
+
 
 def show_info_box():
     catalog = st.session_state["catalog"]
@@ -60,9 +63,7 @@ def init_settings():
         st.session_state["provider"] = DEFAULT_PROVIDER
         st.session_state["providers_dict"] = get_providers()
         st.session_state["catalog"] = Catalog(st.session_state["provider"])
-        st.session_state["email_address"] = ''
-        
-        
+        st.session_state["email_address"] = ""
 
 
 def main():

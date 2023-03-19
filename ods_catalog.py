@@ -17,15 +17,15 @@ from config import *
 
 locale.setlocale(locale.LC_ALL, "")
 cfg = configparser.ConfigParser()
-cfg.read('aws_credentials.cfg')
+cfg.read("aws_credentials.cfg")
 
 hostname = socket.gethostname()
-if hostname.lower() == 'liestal':
-    aws_access_key_id = cfg['default']['aws_access_key_id']
-    aws_secret_access_key = cfg['default']['aws_secret_access_key']
+if hostname.lower() == "liestal":
+    aws_access_key_id = cfg["default"]["aws_access_key_id"]
+    aws_secret_access_key = cfg["default"]["aws_secret_access_key"]
 else:
-    aws_access_key_id = st.secrets['aws_access_key_id']
-    aws_secret_access_key = st.secrets['aws_secret_access_key']
+    aws_access_key_id = st.secrets["aws_access_key_id"]
+    aws_secret_access_key = st.secrets["aws_secret_access_key"]
 dynamodb = boto3.client(
     "dynamodb",
     region_name="eu-central-1",
@@ -33,17 +33,17 @@ dynamodb = boto3.client(
     aws_secret_access_key=aws_secret_access_key,
 )
 
-
-class Subscription:
+class Account:
     """
     see: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/dynamodb.html
     """
 
-    def __init__(self, email, catalog):
+    def __init__(self, email, all_catalogs):
         self.table_name = "ods_subscription"
         self.email = email
-        self.catalog = catalog
-    
+        self.subscriptions = self.get_subscriptions()
+        self.subscriptions_edits = self.init_subscription_edits(all_catalogs)
+
     @property
     def dynamodb_table(self):
         dynamodb_resource = boto3.resource(
@@ -54,23 +54,30 @@ class Subscription:
         )
         return dynamodb_resource.Table(self.table_name)
 
-    def unsubscribe(self):
-        response = self.dynamodb_table.delete_item(Key={"email": self.email, "catalog": self.catalog})
-        st.success(f"You were successfully unsuscribed to the catalog {self.catalog}")
+    def unsubscribe(self, catalog):
+        response = self.dynamodb_table.delete_item(
+            Key={"email": self.email, "catalog": catalog}
+        )
 
-    def subscribe(self):
+    def subscribe(self, catalog):
         created_date = datetime.now().strftime(FORMAT_YMD_HM)
         item = {
             "email": {"S": self.email},
-            "catalog": {"S": self.catalog},
+            "catalog": {"S": catalog},
             "created_date": {"S": created_date},
         }
         response = dynamodb.put_item(TableName="ods_subscription", Item=item)
-        st.success(f"You were successfully suscribed to the catalog {self.catalog}")
 
-    def has_subscription(self):
-        response = self.dynamodb_table.get_item(Key={"email": self.email, "catalog": self.catalog})
-        return "Item" in response
+    def init_subscription_edits(self, all_catalogs):
+        result = {}
+        for catalog in all_catalogs:
+            result[catalog] = (catalog in self.subscriptions)
+        return result
+
+    def get_subscriptions(self) -> list:
+        response = self.dynamodb_table.scan(FilterExpression=Key("email").eq(self.email))
+        result = [x["catalog"] for x in response["Items"]]
+        return result
 
 
 class Catalog:
@@ -89,7 +96,10 @@ class Catalog:
     def display_info_page(self):
         self.providers = sort_dict(self.providers, 1)
         list = [f"<li>[{self.providers[x]}]({x})</li>" for x in self.providers.keys()]
-        list = [f'<li><a href="{x}">{self.providers[x]}</a></li>' for x in self.providers.keys()]
+        list = [
+            f'<li><a href="{x}">{self.providers[x]}</a></li>'
+            for x in self.providers.keys()
+        ]
         list = "".join(list)
         list = f"<ul>{list}</ul><p><p>"
         st.markdown(about.format(len(self.providers), list), unsafe_allow_html=True)
@@ -107,24 +117,64 @@ class Catalog:
     def subscribe(self):
         st.markdown("## Subscribe for Update Notifications")
         st.markdown(
-            f"Enter your email and check the checkbox below if you wish to be notified when the provider **{self.providers[self.base]}** publishes a new dataset."
+            f"Enter your email and select one or several catalogs, for which you wish to be notified by email, when new datasets are published."
         )
 
-        st.session_state["email_address"] = st.text_input("Email", value=st.session_state["email_address"])
-        if st.session_state["email_address"] != '':
-            subscription = Subscription(st.session_state["email_address"], self.base)
-            info_new_datasets = st.checkbox(
-                label="Send mail for new datasets in current catalog", value=True
-            )
-            if subscription.has_subscription():
-                st.info(
-                    "You already are subscribed to this provider, uncheck the checkbox above and press the `Execute` button to unscribe."
-                )
-            if st.button("Execute"):
-                if subscription.has_subscription() and not info_new_datasets:
-                    subscription.unsubscribe()
-                elif not subscription.has_subscription() and info_new_datasets:
-                    subscription.subscribe()
+        st.session_state["email_address"] = st.text_input(
+            "Email", value=st.session_state["email_address"]
+        )
+        if st.session_state["email_address"] != "":
+            account = Account(st.session_state["email_address"], list(self.providers.keys()))
+            checkboxes = {}
+            with st.form("Subscribe to ODS Catalogs"):
+                # remove opendatasoft platform, as it takes too much time to scan it.
+                ods_platform = 'https://data.opendatasoft.com/'
+
+                catalogs = account.subscriptions_edits.copy()
+                del catalogs[ods_platform]
+                for key, value in catalogs.items():
+                    checkboxes[key] = st.checkbox(
+                                        label=self.providers[key], 
+                                        value=value, 
+                                        label_visibility="visible",
+                                        key=key
+                                    )
+                cols = st.columns([1,1,2])
+                n_subscribed, n_unsubscribed = 0,0
+                rerun = False
+                msg = ''
+                with cols[0]:
+                    if st.form_submit_button('Subscribe'):
+                        for catalog in list(self.providers.keys()):
+                            if checkboxes[catalog] and catalog not in account.subscriptions:
+                                account.subscribe(catalog)
+                                n_subscribed +=1
+                        for catalog in list(self.providers.keys()):
+                            if not checkboxes[catalog] and catalog in account.subscriptions:
+                                account.unsubscribe(catalog)
+                                n_unsubscribed += 1
+                        msg = f"You subscribed to {n_subscribed} catalogs and unsubscribed from {n_unsubscribed} catalogs."
+
+                with cols[1]:
+                    if st.form_submit_button('Subscribe to all'):
+                        for catalog in list(self.providers.keys()):
+                            if catalog not in account.subscriptions:
+                                account.subscribe(catalog)
+                                n_subscribed +=1
+                        msg = f"You subscribed to {n_subscribed} catalogs."
+                        rerun = True
+                with cols[2]:
+                    if st.form_submit_button('Unscubscribe from all'):
+                        for catalog in list(self.providers.keys()):
+                            if catalog in account.subscriptions:
+                                account.unsubscribe(catalog)
+                                n_unsubscribed += 1
+                        msg = f"You unsubscribed from {n_unsubscribed} catalogs."
+                        rerun = True
+                if msg > '':
+                    st.success(msg)
+                if rerun:
+                    st.experimental_rerun()
 
     def get_themes(self):
         themes = []

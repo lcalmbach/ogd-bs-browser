@@ -13,8 +13,6 @@ about = """
 In the main window, select one of the following {} data providers:
 {}
 
-suggestions for missing features.
-
 In the box below the data provider, all available datasets for the data providers are displayed. You may filter the results by entering an expression in the title, by one or several themes, or by the datasets displayed in the last n days. The dataset list shows the id (unique dataset identifier), title, and issue date. You may sort the list according to any of these fields by clicking on the respective field in the header row.
 
 Click on a record in the dataset list to load the respective metadata. The title of the dataset shows up below the dataset list, and its primary metadata is displayed on three tabs:
@@ -43,6 +41,9 @@ Note that ODSQL has many limitations and may not work in all instances as expect
 - For large datasets, the number of rows that can be retrieved is limited to 9'900. For datasets with geodata fields holding large objects, the maximum number of records may exceed the memory capacity of this server, and an error will be returned.
 
 If you encounter these or similar issues, change to the original publication of the dataset using the *Current dataset* link in the navigation sidebar. Then export the data and perform the analysis locally.
+
+#### Subscriptions
+The `Subscriptions` page allows users to subscribe to a notification service. This service will notify you if new datasets are published for every catalog you subscribe to. First enter your email address. A form will be shown, presenting a checkbox for each available catalog. Initially, all checkboxes will be unchecked. Activate one or several checkboxes for catalogs you are interested in and press the `Subscribe` button. You will be notified about new datasets for these catalogs whenever the notification service discovers new datasets. The service runs daily. The `Subscribe to all` and `Unsubscribe to all` buttons allow you to subscribe or unsubscribe from all services. To unsubscribe selectively from a catalog: Enter your email. The list of checkboxes will show all catalogs this email address is subscribed to as checked. Uncheck the unwanted subscriptions and press the `Subscribe` button. Note that you presently cannot subscribe to the ods-data-hub, which is composed of all ods-client-catalogs. This hub includes more than 30'000 datasets and is too time consuming to scan.
 
 #### More Resources:
 - [Opendatasoft data hub](https://data.opendatasoft.com/pages/home/)
