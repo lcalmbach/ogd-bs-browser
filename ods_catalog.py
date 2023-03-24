@@ -1,3 +1,6 @@
+    """ods-explorer is a web upp allowing the user to browse a number of ods-sites. 
+    """
+
 import streamlit as st
 import requests
 import pandas as pd
@@ -8,7 +11,6 @@ from dataclasses import dataclass
 import boto3
 from boto3.dynamodb.conditions import Key
 import socket
-import configparser
 
 from tools import *
 from text import *
@@ -16,12 +18,10 @@ from config import *
 
 
 locale.setlocale(locale.LC_ALL, "")
-cfg = configparser.ConfigParser()
-cfg.read("aws_credentials.cfg")
 
 hostname = socket.gethostname()
-AWS_ACCESS_KEY_ID = get_config_value("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = get_config_value("AWS_SECRET_ACCESS_KEY")
+AWS_ACCESS_KEY_ID = get_config_value("aws_access_key_id")
+AWS_SECRET_ACCESS_KEY = get_config_value("aws_secret_access_key")
 
 dynamodb = boto3.client(
     "dynamodb",
