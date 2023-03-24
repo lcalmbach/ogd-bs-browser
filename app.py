@@ -1,7 +1,6 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
 import requests
-import json
 
 from tools import *
 from ods_catalog import *

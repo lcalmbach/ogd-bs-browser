@@ -1,6 +1,3 @@
-    """ods-explorer is a web upp allowing the user to browse a number of ods-sites. 
-    """
-
 import streamlit as st
 import requests
 import pandas as pd
