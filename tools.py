@@ -2,9 +2,15 @@
     Collection of useful functions.
 """
 
-import random, string
+import random
+import string
+import socket
+import os
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import smtplib
 
-
+DEV_MACHINES = ['liestal']
 __author__ = "lcalmbach@gmail.com"
 
 # todo
@@ -320,3 +326,22 @@ def sort_object_list(lst: list, sort_field: str, reverse: bool = False) -> list:
     https://www.techiedelight.com/sort-list-of-objects-python/#:~:text=A%20simple%20solution%20is%20to%20use%20the%20list.sort,accepts%20two%20optional%20keyword-only%20arguments%3A%20key%20and%20reverse.
     """
     lst.sort(key=lambda x: x[sort_field], reverse=reverse)
+
+def send_mail(mail):
+    message = MIMEMultipart()
+    message["From"] = mail['sender_email']
+    message["To"] = mail['receiver_email']
+    message["Subject"] = mail['subject']
+    message.attach(MIMEText(mail["body"], "plain"))
+
+    # Connect to SMTP server and send email
+    with smtplib.SMTP("smtp.gmail.com", 587) as smtp:
+        smtp.starttls()
+        smtp.login(mail['sender_email'], mail['password'])
+        smtp.send_message(message)
+
+def get_config_value(key: str) -> str:
+    if socket.gethostname().lower() in DEV_MACHINES:
+        return os.environ.get(key)
+    else:
+        return st.secrets[key]

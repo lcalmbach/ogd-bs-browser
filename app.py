@@ -8,7 +8,7 @@ from ods_catalog import *
 from config import *
 
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 __author__ = "Lukas Calmbach"
 __author_email__ = "lcalmbach@gmail.com"
 VERSION_DATE = "2023-19-03"
@@ -95,7 +95,6 @@ def main():
         else:
             catalog = Catalog(sel_provider)
             st.session_state["provider"] = sel_provider
-            st.write(st.session_state["provider"])
         catalog.set_current_record()
         st.session_state["catalog"] = catalog
         catalog.current_dataset.display_header()

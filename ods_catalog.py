@@ -20,17 +20,14 @@ cfg = configparser.ConfigParser()
 cfg.read("aws_credentials.cfg")
 
 hostname = socket.gethostname()
-if hostname.lower() == "liestal":
-    aws_access_key_id = cfg["default"]["aws_access_key_id"]
-    aws_secret_access_key = cfg["default"]["aws_secret_access_key"]
-else:
-    aws_access_key_id = st.secrets["aws_access_key_id"]
-    aws_secret_access_key = st.secrets["aws_secret_access_key"]
+AWS_ACCESS_KEY_ID = get_config_value("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = get_config_value("AWS_SECRET_ACCESS_KEY")
+
 dynamodb = boto3.client(
     "dynamodb",
     region_name="eu-central-1",
-    aws_access_key_id=aws_access_key_id,
-    aws_secret_access_key=aws_secret_access_key,
+    aws_access_key_id=AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
 )
 
 class Account:
@@ -49,8 +46,8 @@ class Account:
         dynamodb_resource = boto3.resource(
             "dynamodb",
             region_name="eu-central-1",
-            aws_access_key_id=aws_access_key_id,
-            aws_secret_access_key=aws_secret_access_key,
+            aws_access_key_id=AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
         )
         return dynamodb_resource.Table(self.table_name)
 
@@ -319,7 +316,7 @@ class Dataset:
         self.query = Query(self, None)
 
     def get_record_count(self):
-        url = f"{self.parent.base}/api/v2/catalog/datasets/{self.id}/records?limit=1&offset=0&timezone=UTC"
+        url = f"{self.parent.base}api/v2/catalog/datasets/{self.id}/records?limit=1&offset=0&timezone=UTC"
         count = 0
         try:
             response = requests.get(url)
@@ -332,7 +329,7 @@ class Dataset:
         return count
 
     def preview_data(self, rows):
-        url = f"{self.parent.base}/api/v2/catalog/datasets/{self.id}/exports/csv/?limit={rows}&offset=0&timezone=UTC"
+        url = f"{self.parent.base}api/v2/catalog/datasets/{self.id}/exports/csv/?limit={rows}&offset=0&timezone=UTC"
         response = requests.get(url)
         df = pd.read_csv(io.StringIO(response.text), sep=";")
         st.markdown(f"{self.record_count :n} records")
