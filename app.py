@@ -10,7 +10,7 @@ from config import *
 __version__ = "0.2.2"
 __author__ = "Lukas Calmbach"
 __author_email__ = "lcalmbach@gmail.com"
-VERSION_DATE = "2023-19-03"
+VERSION_DATE = "2023-07-05"
 MY_EMOJI = "🔭"
 MY_NAME = f"ODS-Data-Explorer"
 GIT_REPO = "https://github.com/lcalmbach/ogd-bs-browser"
