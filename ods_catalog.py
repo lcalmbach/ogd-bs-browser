@@ -123,7 +123,6 @@ class Catalog:
             with st.form("Subscribe to ODS Catalogs"):
                 # remove opendatasoft platform, as it takes too much time to scan it.
                 ods_platform = 'https://data.opendatasoft.com/'
-
                 catalogs = account.subscriptions_edits.copy()
                 del catalogs[ods_platform]
                 for key, value in catalogs.items():
@@ -340,7 +339,7 @@ class Dataset:
 
     def display_header(self):
         st.markdown(f"### {self.title}")
-        tabs = st.tabs(["Description", "Preview", "Fields", "Gugus"])
+        tabs = st.tabs(["Description", "Preview", "Fields"])
         with tabs[0]:
             st.markdown(self.description, unsafe_allow_html=True)
         with tabs[1]:
