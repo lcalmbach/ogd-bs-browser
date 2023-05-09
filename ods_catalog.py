@@ -27,6 +27,7 @@ dynamodb = boto3.client(
     aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
 )
 
+
 class Account:
     """
     see: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/dynamodb.html
@@ -65,11 +66,13 @@ class Account:
     def init_subscription_edits(self, all_catalogs):
         result = {}
         for catalog in all_catalogs:
-            result[catalog] = (catalog in self.subscriptions)
+            result[catalog] = catalog in self.subscriptions
         return result
 
     def get_subscriptions(self) -> list:
-        response = self.dynamodb_table.scan(FilterExpression=Key("email").eq(self.email))
+        response = self.dynamodb_table.scan(
+            FilterExpression=Key("email").eq(self.email)
+        )
         result = [x["catalog"] for x in response["Items"]]
         return result
 
@@ -118,53 +121,61 @@ class Catalog:
             "Email", value=st.session_state["email_address"]
         )
         if st.session_state["email_address"] != "":
-            account = Account(st.session_state["email_address"], list(self.providers.keys()))
+            account = Account(
+                st.session_state["email_address"], list(self.providers.keys())
+            )
             checkboxes = {}
             with st.form("Subscribe to ODS Catalogs"):
                 # remove opendatasoft platform, as it takes too much time to scan it.
-                ods_platform = 'https://data.opendatasoft.com/'
+                ods_platform = "https://data.opendatasoft.com/"
                 catalogs = account.subscriptions_edits.copy()
                 del catalogs[ods_platform]
                 for key, value in catalogs.items():
                     checkboxes[key] = st.checkbox(
-                                        label=self.providers[key], 
-                                        value=value, 
-                                        label_visibility="visible",
-                                        key=key
-                                    )
-                cols = st.columns([1,1,2])
-                n_subscribed, n_unsubscribed = 0,0
+                        label=self.providers[key],
+                        value=value,
+                        label_visibility="visible",
+                        key=key,
+                    )
+                cols = st.columns([1, 1, 2])
+                n_subscribed, n_unsubscribed = 0, 0
                 rerun = False
-                msg = ''
+                msg = ""
                 with cols[0]:
-                    if st.form_submit_button('Subscribe'):
+                    if st.form_submit_button("Subscribe"):
                         for catalog in list(catalogs.keys()):
-                            if checkboxes[catalog] and catalog not in account.subscriptions:
+                            if (
+                                checkboxes[catalog]
+                                and catalog not in account.subscriptions
+                            ):
                                 account.subscribe(catalog)
-                                n_subscribed +=1
+                                n_subscribed += 1
                         for catalog in list(catalogs.keys()):
-                            if not checkboxes[catalog] and catalog in account.subscriptions:
+                            if (
+                                not checkboxes[catalog]
+                                and catalog in account.subscriptions
+                            ):
                                 account.unsubscribe(catalog)
                                 n_unsubscribed += 1
                         msg = f"You subscribed to {n_subscribed} catalogs and unsubscribed from {n_unsubscribed} catalogs."
 
                 with cols[1]:
-                    if st.form_submit_button('Subscribe to all'):
+                    if st.form_submit_button("Subscribe to all"):
                         for catalog in list(catalogs.keys()):
                             if catalog not in account.subscriptions:
                                 account.subscribe(catalog)
-                                n_subscribed +=1
+                                n_subscribed += 1
                         msg = f"You subscribed to {n_subscribed} catalogs."
                         rerun = True
                 with cols[2]:
-                    if st.form_submit_button('Unscubscribe from all'):
+                    if st.form_submit_button("Unscubscribe from all"):
                         for catalog in list(catalogs.keys()):
                             if catalog in account.subscriptions:
                                 account.unsubscribe(catalog)
                                 n_unsubscribed += 1
                         msg = f"You unsubscribed from {n_unsubscribed} catalogs."
                         rerun = True
-                if msg > '':
+                if msg > "":
                     st.success(msg)
                 if rerun:
                     st.experimental_rerun()
@@ -255,7 +266,6 @@ class Catalog:
             if date_filter > 0:
                 df = filter_for_dates(df, date_filter)
             settings = get_table_settings(df)
-
             st.markdown(f"{self.providers[self.base]} has {len(df)} datasets")
             cols = [
                 {
@@ -339,13 +349,15 @@ class Dataset:
 
     def display_header(self):
         st.markdown(f"### {self.title}")
-        tabs = st.tabs(["Description", "Preview", "Fields"])
+        tabs = st.tabs(["Description", "Preview", "Fields", "Theme"])
         with tabs[0]:
             st.markdown(self.description, unsafe_allow_html=True)
         with tabs[1]:
             self.preview_data(MAX_PREVIEW_RECORDS)
         with tabs[2]:
             st.write(self.fields_df)
+        with tabs[3]:
+            st.write(pd.DataFrame(self.themes, columns=["Theme"]))
 
     def display_query_result(self):
         st.markdown(f"**Query dataset: {self.title}**")

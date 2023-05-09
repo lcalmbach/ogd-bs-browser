@@ -212,7 +212,6 @@ def show_table(df: pd.DataFrame, cols=[], settings={}):
     set_defaults()
     gb = GridOptionsBuilder.from_dataframe(df)
     # customize gridOptions
-
     gb.configure_default_column(
         groupable=False, value=True, enableRowGroup=False, aggFunc="sum", editable=False
     )

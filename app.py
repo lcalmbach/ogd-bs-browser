@@ -7,10 +7,10 @@ from ods_catalog import *
 from config import *
 
 
-__version__ = "0.2.2"
+__version__ = "0.2.3"
 __author__ = "Lukas Calmbach"
 __author_email__ = "lcalmbach@gmail.com"
-VERSION_DATE = "2023-07-05"
+VERSION_DATE = "2023-05-09"
 MY_EMOJI = "🔭"
 MY_NAME = f"ODS-Data-Explorer"
 GIT_REPO = "https://github.com/lcalmbach/ogd-bs-browser"
@@ -19,6 +19,7 @@ PROVIDERS_URL = (
     "https://ods-browser-bucket.s3.eu-central-1.amazonaws.com/ods-catalogs.json"
 )
 APP_URL = "https://lcalmbach-ogd-bs-browser-app-as449l.streamlit.app/"
+
 
 def get_providers() -> dict:
     response = requests.get(PROVIDERS_URL)
