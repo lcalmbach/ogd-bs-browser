@@ -118,7 +118,7 @@ class Catalog:
         )
 
         st.session_state["email_address"] = st.text_input(
-            "Email", value=st.session_state["email_address"]
+            "Your Email", value=st.session_state["email_address"]
         )
         if st.session_state["email_address"] != "":
             account = Account(
