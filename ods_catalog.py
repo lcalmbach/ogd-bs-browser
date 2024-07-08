@@ -339,13 +339,13 @@ class Dataset:
         response = requests.get(url)
         df = pd.read_csv(io.StringIO(response.text), sep=";")
         st.markdown(f"{self.record_count :n} records")
-        st.write(df)
+        st.dataframe(df)
         show_download_button(df)
 
     def show_fields(self):
         df = pd.DataFrame(self.fields)
         df = df[["name", "description", "label", "type"]]
-        st.write(df)
+        st.dataframe(df)
 
     def display_header(self):
         st.markdown(f"### {self.title}")

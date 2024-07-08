@@ -10,7 +10,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import smtplib
 
-DEV_MACHINES = ["liestal"]
+DEV_MACHINES = ["liestal", "desktop-fo7m3a8"]
 __author__ = "lcalmbach@gmail.com"
 
 # todo
@@ -190,8 +190,7 @@ def get_table_settings(df: pd.DataFrame):
 
     result = {"height": 400}
     if len(df) > 0:
-        height = (len(df) + 1) * row_height
-
+        height = 50 + len(df) * row_height
         if height > max_height:
             height = max_height
         result = {"height": height}
